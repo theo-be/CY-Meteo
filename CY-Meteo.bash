@@ -1,7 +1,9 @@
 #!/bin/bash
 
 
-# cut -d\; -f1 data/meteo_filtered_data_v1.csv > test/test.csv
+
+
+
 
 # arguments a verifier avant d'executer :
 # si -d date date
@@ -11,7 +13,6 @@
 # types de donnees
 
 # arguments incompatibles :
-# --avl --abr --tab
 # lieux
 
 # arguments obligatoires :
@@ -24,6 +25,30 @@
 #  --avl, --abr, --tab
 # lieux
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# constantes : numero des champs dans le fichier csv
 
 # numeros des colonnes par champ :
 # 1 : id station
@@ -42,11 +67,61 @@
 # 14 : Altitude
 # 15 : communes (code)
 
+NUM_CHAMP_STATION='1'
+NUM_CHAMP_DATE='2'
+NUM_CHAMP_PRESSION_MER='3'
+NUM_CHAMP_DIRECTION_VENT='4'
+NUM_CHAMP_VITESSE_VENT='5'
+NUM_CHAMP_HUMIDITE='6'
+NUM_CHAMP_PRESSION_STATION='7'
+NUM_CHAMP_VARIATION_PRESSION='8'
+NUM_CHAMP_PRECIPITATIONS='9'
+NUM_CHAMP_COORDONEES='10'
+NUM_CHAMP_TEMPERATURE='11'
+NUM_CHAMP_TEMPERATURE_MIN='12'
+NUM_CHAMP_TEMPERATURE_MAX='13'
+NUM_CHAMP_ALTITUDE='14'
+NUM_CHAMP_COMMUNES='15'
 
 
 
+# constantes : regex 
 
-# verifier chaque option au lieu de verif le nombre d'args
+
+# 1>95 france
+# 
+
+
+# 98411 > 98415 antarctique
+# 9841[1-5]
+
+# 973 0-99 guyane
+
+# 97501>97502 saint pierre et miquelon
+# 97[3-5]00
+
+# antilles
+# guadeloupe 97101 97134
+# mar 97201 97234
+# saint mar 97801
+# st bar 97701
+# 97[1-2]00
+# 97[7-8]00
+
+
+# ocean indien
+# mayotte 976
+# la reunion 974
+# 97[4-6]00
+
+regex=""
+commande_grep=""
+REGEX_FRANCE="([0-8][0-9]|9[0-5]|2[a,b,A,B])[0-9]{3}$"
+REGEX_ANTILLES="97[1-2,7-8][0-9]{2}$"
+REGEX_ANTARCTIQUE="9841[0-9]$"
+REGEX_OCEAN_INDIEN="97[4,6][0-9]{2}$"
+REGEX_GUYANE="973[0-9]{2}$"
+REGEX_SAINT_PIERRE="975[0-9]{2}$"
 
 
 
@@ -57,6 +132,7 @@ MESSAGE_ERREUR_PRESSION='erreur pression'
 # nom des fichiers d'entree/sortie
 
 fichier_entree=''
+fichier_inter='test/temp1.csv'
 fichier_sortie='test/filtre.csv'
 
 # presence des arguments
@@ -77,65 +153,8 @@ arg_option=0
 arg_lieu=0
 lieu=''
 arg_mode_tri=0
-mode_tri='--avl'
+mode_tri='avl'
 
-
-# numero des champs dans le fichier
-
-NUM_CHAMP_STATION='1'
-NUM_CHAMP_DATE='2'
-NUM_CHAMP_DIRECTION_VENT='4'
-NUM_CHAMP_VITESSE_VENT='5'
-NUM_CHAMP_HUMIDITE='6'
-NUM_CHAMP_PRESSION='7'
-NUM_CHAMP_VARIATION_PRESSION='8'
-NUM_CHAMP_PRECIPITATIONS='9'
-NUM_CHAMP_COORDONEES='10'
-NUM_CHAMP_TEMPERATURE='11'
-NUM_CHAMP_TEMPERATURE_MIN='12'
-NUM_CHAMP_TEMPERATURE_MAX='13'
-NUM_CHAMP_ALTITUDE='14'
-NUM_CHAMP_COMMUNES='15'
-
-
-
-# chaine='-p2'
-# c1='-p'
-# c2='-p1'
-# c3='-p2'
-# c4='-p3'
-
-# if [ "$chaine" = "$c1" ] ; then
-#     echo "c1="
-# fi
-# if [ "$chaine" \> "$c1" ] ; then
-#     echo "c1>"
-# fi
-# if [ "$chaine" \< "$c1" ] ; then
-#     echo "c1<"
-# fi
-
-
-
-
-# echo "nombre d'arguments : $#"
-
-oldIFS=$IFS
-IFS=' '
-############################################################
-
-# while getops <format> option ; do
-# while getops <format> option ; do
-#     case "$option" in
-
-
-
-
-#         *) ;;
-#     esac
-
-
-# done
 
 
 
@@ -143,237 +162,161 @@ IFS=' '
 
 
 
-##############################################
+# echo "nombre d'arguments : $#"
 
 
 
 
+# optlieu $option
+optlieu() {
+    if (($arg_lieu != 0)) ; then 
+        echo "Erreur arg lieu -$1 : l'option de lieu doit etre unique"
+        return 1
+    fi
+    arg_lieu=1
+    lieu=$1
+    echo "lieu : $lieu"
+    return 0
+}
 
 
 
-# premiere boucle pour verifier les parametres importants ou obligatoires
+# recuperation des arguments et options avec getopts
 
-for arg in "$@" ; do
+while getopts ":wmhp:t:FGSAOQf:d::-:" option ; do
+    # options longues
+    if [ $option = '-' ] ; then
+        case $OPTARG in
+            help) echo "menu d'aide";; # sortir immediatement apres
+            version) echo "CY-Meteo version 0.1";; # sortir immediatement apres
+            avl) echo "opt $OPTARG"
+            mode_tri=$OPTARG ;;
+            abr) echo "opt $OPTARG"
+            mode_tri=$OPTARG ;;
+            tab) echo "opt $OPTARG"
+            mode_tri=$OPTARG ;;
+            *) echo "opt $OPTARG : option invalide";;
+        esac
+    else
+    # options courtes
+        case "$option" in
+            # options de donnees
+            w) echo 'opt w'
+            arg_option=1
+            arg_vent=1 ;;
+            h) echo 'opt h'
+            arg_option=1
+            arg_altitude=1 ;;
+            m) echo 'opt m'
+            arg_option=1
+            arg_humidite=1 ;;
+            p) echo 'opt p'
+            if (($OPTARG < 1)) || (($OPTARG > 3)) ; then
+                echo "Erreur mode de pression"
+                exit 1
+            fi
+            echo "mode $OPTARG"
+            arg_option=1
+            arg_pression=$OPTARG ;;
+            t) echo 'opt t'
+            if (($OPTARG < 1)) || (($OPTARG > 3))  ; then
+                echo "Erreur mode de temp"
+                exit 1
+            fi
+            echo "mode $OPTARG"
+            arg_option=1
+            arg_temperature=$OPTARG ;;
 
-    if (( $arg_fichier == -1 )) ; then
-        if [ ! -f $arg ] ; then
-            echo "Erreur : '$arg' n'existe pas ou n'est pas un fichier"
-            exit 1
-        fi
-        fichier_entree=$arg
-        arg_fichier=1
-        echo "fichier d'entree : $fichier_entree"
-        continue
+            # options de date
+            d) echo 'opt d'
+            echo "opt date : $OPTARG"
+            arg_date1=$OPTARG
+            # arg_date2 ??????????????????????????????????????????
+            # verif date blabla
+            ;;
+
+            # options de fichier
+            f) echo 'opt f'
+            if (( $arg_fichier != 0 )) ; then
+                echo "Erreur : plusieurs fois -f"
+                exit 1
+            fi
+            echo "opt fichier : $OPTARG"
+            fichier_entree="$OPTARG"
+            if [ ! -f "$fichier_entree" ] ; then
+                echo "Erreur : '$fichier_entree' n'existe pas ou n'est pas un fichier"
+                exit 1
+            fi
+            arg_fichier=1
+            echo "fichier d'entree : $fichier_entree"
+            ;;
+
+            # options de lieu
+            # verif l'exclusivite de ces opt
+            F) echo 'opt F'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_FRANCE" ;;
+            G) echo 'opt G'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_GUYANE" ;;
+            S) echo 'opt S'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_SAINT_PIERRE" ;;
+            A) echo 'opt A'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_ANTILLES" ;;
+            O) echo 'opt O'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_OCEAN_INDIEN" ;;
+            Q) echo 'opt Q'
+            if ! optlieu $option ; then
+                exit 1
+            fi 
+            regex="$REGEX_ANTARCTIQUE" ;;
+
+
+            # autre
+            *) echo "$OPTARG : option invalide"
+            echo "$option : option invalide"
+            exit 1;;
+            --) break;;
+        esac
     fi
 
-
-
-
-
-    case $arg in
-    '--help') 
-        echo "menu d'aide utilisateur"
-        exit 0 ;;
-    '--version') 
-        echo "CY-Meteo version 0"
-        echo "Voir --help pour le menu d'aide"
-        exit 0 ;;
-    '-f') 
-        if (( $arg_fichier == 1 )) ; then
-            echo "Erreur : plusieurs fois -f"
-            exit 1
-        fi
-        arg_fichier=-1 ;;
-
-
-    esac
 done
 
 
 
 
-# verifier les param obligatoires manquants
-
-if (($arg_fichier != 1)) ; then
-    echo "Erreur : fichier d'entree specifie"
-    # exit 1
-fi
 
 
-
-
-# boucle de recuperation des autres arguments
-
-for arg in "$@" ; do
-    # echo $arg
-
-    # verification des dates
-
-    if (($arg_date < 0)) ; then
-        # echo "arg date : $arg_date"
-        if (($arg_date == -1)) ; then
-            arg_date1=$arg
-            arg_date=-2
-            # echo "date 1 : $arg_date1"
-            continue
-        elif (($arg_date == -2)) ; then
-            arg_date2=$arg
-            arg_date=1
-            # echo "date 2 : $arg_date2"
-            continue
-        fi
-    fi
-
-
-
-
-
-    case $arg in
-
-        # options de donnees
-
-        '-m') # humidite
-            echo "humidite"
-            if (( $arg_humidite > 0 )) ; then
-                echo "pb humidite"
-                # affichage du menu d'aide
-                # ./CY-Meteo.bash --help
-                exit 1
-            fi
-            arg_humidite=1
-            arg_option=1 ;;
-        
-        '-h') # altitude
-            echo "altitude"
-            if (( $arg_altitude > 0 )) ; then
-                echo "pb humidite"
-                exit 1
-            fi
-            arg_altitude=1
-            arg_option=1 ;;
-        '-w') # vent
-            echo "vent"
-            if (( $arg_vent > 0 )) ; then
-                echo "pb vent"
-                exit 1
-            fi
-            arg_vent=1
-            arg_option=1 ;;
-
-
-
-        # options de lieu
-        '-F') # France
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-        '-G') # Guyane
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-        '-S') # Saint Pierre et Miquelon
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-        '-A') # Antilles
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-        '-O') # Ocean Indien
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-        '-Q') # Antarctique
-            if (( $arg_lieu != 0 )) ; then
-                echo "Erreur : un seul lieu en meme temps"
-                exit 1
-            fi
-            arg_lieu=1
-            lieu="$arg" ;;
-
-
-        # dates
-
-        '-d') 
-            if (( $arg_date != 0)) ; then
-                echo "Erreur date"
-            fi
-            arg_date=-1 ;;
-
-
-
-
-        # modes de tri
-
-        '--avl')
-            if (( $arg_mode_tri != 0 )) ; then
-                echo "Erreur mode de tri"
-                # exit 1
-            fi
-            arg_mode_tri=1 ;;
-
-        '--abr')
-            if (( $arg_mode_tri != 0 )) ; then
-                echo "Erreur mode de tri"
-                # exit 1
-            fi
-            arg_mode_tri=2
-            mode_tri=$arg ;;
-
-        '--tab')
-            if (( $arg_mode_tri != 0 )) ; then
-                echo "Erreur mode de tri"
-                # exit 1
-            fi
-            arg_mode_tri=3
-            mode_tri=$arg ;;
-
-
-
-        
-        *) 
-            # modes de pression et temperature
-            if [ "$arg" \> '-p' ] && [ "$arg" \< '-p4' ] ; then
-                echo "mode de pression"
-                arg_pression=1
-                mode_pression=$arg
-                arg_option=1
-            elif [ "$arg" \> '-t' ] && [ "$arg" \< '-t4' ] ; then
-                echo "mode de temp"
-                arg_temperature=1
-                mode_temperature=$arg
-                arg_option=1
-            else # argument inconnu
-                echo "Erreur : $arg : argument invalide"
-                # exit 1
-            fi ;;
-    esac
-done
-
-IFS=$oldIFS
 
 if (( $arg_option != 1 )) ; then
     echo "Erreur : veuillez preciser au moins une option de type de donnee"
-    IFS=$oldIFS
+    exit 1
+elif (( $arg_fichier != 1 )) ; then
+    echo "Erreur pas de fichier d'entree"
     exit 1
 fi
 
+# exit 0
+
 # commandes de filtrage
+
+
+
+
+
 
 # vent : produit en sortie l’orientation moyenne et la vitesse moyenne des
 # vents pour chaque station. Quand on parle de moyenne, il s’agira de
@@ -386,6 +329,8 @@ fi
 # altitude : Produit en sortie l’altitude pour chaque station. Les altitudes seront triées par ordre décroissant.
 
 # humidite : Produit en sortie l’humidité maximale pour chaque station. Les valeurs d’humidités seront triées par ordre décroissant.
+
+
 
 # pression/temperature :
 # 1 : produit en sortie les températures (ou pressions)
@@ -400,80 +345,152 @@ fi
 
 
 
+# filtrage selon le mode de donnee
 
-if (($arg_pression > 0)) ; then
-    echo "filtre pre"
-    # mode 1
-    if [ "$mode_pression" = '-p1' ] ; then
-        echo "filtre p1"
-        echo "cut -d\; -f$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_MER,$NUM_CHAMP_PRESSION_STATION $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_MER","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "$fichier_sortie"
-    elif [ "$mode_pression" = '-p2' ] ; then # mode 2
-        echo "filtre p2"
-        echo "cut -d\; -f$NUM_CHAMP_DATE,$NUM_CHAMP_PRESSION_STATION $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "$fichier_sortie"
-    else # mode 3
-        echo "filtre p3"
-        echo "cut -d\; -f$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_STATION $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "$fichier_sortie"
-    fi
+
+code_communes=''
+if (($arg_lieu == 1)) ; then
+    code_communes="$NUM_CHAMP_COMMUNES,"
 fi
-if (($arg_temperature > 0)) ; then
-    echo "filtre temp"
-    # mode 1
-    if [ "$mode_temperature" = '-t1' ] ; then
-        echo "filtre t1"
-        echo "cut -d\; -f$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE,$NUM_CHAMP_TEMPERATURE_MIN,$NUM_CHAMP_TEMPERATURE_MAX $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE","$NUM_CHAMP_TEMPERATURE_MIN","$NUM_CHAMP_TEMPERATURE_MAX" "$fichier_entree" > "$fichier_sortie"
-    elif [ "$mode_temperature" = '-t2' ] ; then # mode 2
-        echo "filtre t2"
-        echo "cut -d\; -f$NUM_CHAMP_DATE,$NUM_CHAMP_TEMPERATURE $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "$fichier_sortie"
-    else # mode 3
-        echo "filtre t3"
-        echo "cut -d\; -f$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE $fichier_entree > $fichier_sortie"
-        cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "$fichier_sortie"
-    fi
+
+
+if (($arg_lieu == 1)) ; then
+    commande_grep="grep -E \"$regex\" $fichier_entree"
 fi
+
+# ancienne version
+
+
+
+
+
+
+
+# if (($arg_altitude > 0)) ; then
+#     echo "filtrage alt ancien"
+#     # verifier les autres options
+#     echo "cut -d\; -f$code_communes$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_altitude.csv"
+#     cut -d\; -f"$code_communes$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_altitude.csv"
+#     if (($arg_lieu == 1)) ; then
+#         echo "grep -E \"$regex\" test/filtre_altitude.csv > test/temp1.csv"
+#         grep -E "\"$regex\"" test/filtre_altitude.csv > test/temp1.csv
+#         head -30 "test/temp1.csv"
+#     fi
+#     echo "fini"
+# fi
+
+
+# nouvelle version
+
+
+# if (($arg_altitude > 0)) ; then
+#     echo 'filtrage alt nouveau'
+#     echo "$commande_grep cut -d';' -f$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION > test/filtre_altitude.csv"
+#     "$commande_grep" | cut -d';' -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" > "test/filtre_altitude.csv"
+#     head -30 "test/filtre_altitude.csv"
+#     echo "fini"
+# fi
+
+
+
+
+
+
+
+
+
+# exit 0
+
+
+
+
 
 
 if (($arg_altitude > 0)) ; then
-    echo "filtre alt"
+    echo "filtrage alt"
     # verifier les autres options
-    echo "cut -d\; -f$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION $fichier_entree > $fichier_sortie"
-    cut -d\; -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > "$fichier_sortie"
+    echo "cut -d\; -f$code_communes$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_altitude.csv"
+    cut -d\; -f"$code_communes$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_altitude.csv"
+
 fi
+
+
 if (($arg_humidite > 0)) ; then
     echo "filtre hum"
     # verifier les autres options
-    echo "cut -d\; -f$NUM_CHAMP_HUMIDITE,$NUM_CHAMP_STATION $fichier_entree > $fichier_sortie"
-    cut -d\; -f"$NUM_CHAMP_HUMIDITE","$NUM_CHAMP_STATION" "$fichier_entree" > "$fichier_sortie"
+    echo "cut -d\; -f$code_communes$NUM_CHAMP_HUMIDITE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_humidite.csv"
+    cut -d\; -f"$code_communes$NUM_CHAMP_HUMIDITE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_humidite.csv"
 fi
 if (($arg_vent > 0)) ; then
     echo "filtre vent"
-    echo "cut -d\; -f$NUM_CHAMP_STATION,$NUM_CHAMP_DIRECTION_VENT,$NUM_CHAMP_VITESSE_VENT $fichier_entree > $fichier_sortie"
-    cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_DIRECTION_VENT","$NUM_CHAMP_VITESSE_VENT" "$fichier_entree" > "$fichier_sortie"
-    
+    echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_DIRECTION_VENT,$NUM_CHAMP_VITESSE_VENT $fichier_entree > test/filtre_vent.csv"
+    cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_DIRECTION_VENT","$NUM_CHAMP_VITESSE_VENT" "$fichier_entree" > "test/filtre_vent.csv"
 fi
 
 
+if (($arg_pression > 0)) ; then
+    echo "filtrage pre"
+    # mode 1
+    if (($arg_pression == 1)) ; then
+        echo "filtrage p1"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p1.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p1.csv"
+    elif (($arg_pression == 2)) ; then # mode 2
+        echo "filtrage p2"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p2.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p2.csv"
+    else # mode 3
+        echo "filtrage p3"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p3.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p3.csv"
+    fi
+fi
+if (($arg_temperature > 0)) ; then
+    echo "filtrage temp"
+    # mode 1
+    if (($arg_temperature == 1)) ; then
+        echo "filtrage t1"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE,$NUM_CHAMP_TEMPERATURE_MIN,$NUM_CHAMP_TEMPERATURE_MAX $fichier_entree > test/filtre_t1.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE","$NUM_CHAMP_TEMPERATURE_MIN","$NUM_CHAMP_TEMPERATURE_MAX" "$fichier_entree" > "test/filtre_t1.csv"
+    elif (($arg_temperature == 2)) ; then # mode 2
+        echo "filtrage t2"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_TEMPERATURE $fichier_entree > test/filtre_t2.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "test/filtre_t2.csv"
+    else # mode 3
+        echo "filtrage t3"
+        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE $fichier_entree > test/filtre_t3.csv"
+        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "test/filtre_t3.csv"
+    fi
+fi
+
+# le code commune est toujours le dernier champ 
 
 
-# NUM_CHAMP_STATION='1'
-# NUM_CHAMP_DATE='2'
-# NUM_CHAMP_PRESSION_MER='3'
-# NUM_CHAMP_DIRECTION_VENT='4'
-# NUM_CHAMP_VITESSE_VENT='5'
-# NUM_CHAMP_HUMIDITE='6'
-# NUM_CHAMP_PRESSION_STATION='7'
-# NUM_CHAMP_VARIATION_PRESSION='8'
-# NUM_CHAMP_PRECIPITATIONS='9'
-# NUM_CHAMP_COORDONEES='10'
-# NUM_CHAMP_TEMPERATURE='11'
-# NUM_CHAMP_TEMPERATURE_MIN='12'
-# NUM_CHAMP_TEMPERATURE_MAX='13'
-# NUM_CHAMP_ALTITUDE='14'
-# NUM_CHAMP_COMMUNES='15'
+
+
+
+
+# Each range is one of:
+
+#   N     N'th byte, character or field, counted from 1
+#   N-    from N'th byte, character or field, to end of line
+#   N-M   from N'th to M'th (included) byte, character or field
+#   -M    from first to M'th (included) byte, character or field
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -483,12 +500,11 @@ fi
 # verification de l'existence du fichier de tri
 
 if [ ! -x 'bin/tri' ] ; then
-    echo "pas de fichier de tri"
+    echo "Compilation du fichier exec de tri"
     make all
-    echo "retour makefile : $?"
+    echo "Retour makefile : $?"
     if (($? != 0)) ; then
-        echo "erreur makefile"
-        IFS=$oldIFS
+        echo "Erreur makefile"
         exit 1
     fi
 fi
@@ -500,7 +516,7 @@ echo "./bin/tri $mode_tri"
 
 
 
-
+make mrproper
 echo "Fin normale du programme"
 exit 0
 
@@ -528,11 +544,14 @@ exit 0
 
 
 # verifier les params d'entree :
-# verifier la compatibilite des params /
+# verifier la compatibilite des params
 # verifier lexistence du fichier /
-
+# revoir les cut
+# LA DATE
 # aller chercher le fichier et filtrer
 # si plusieurs modes : les faire a la suite dans plusieurs fichiers de sortie
+# verifier le format des dates
+# voir le fichier de sortie shell
 
 # verifier l'existence du C
 # le compiler sinon
@@ -542,15 +561,11 @@ exit 0
 
 
 # continuer la verif des arguments
-# fusionner les boucles
 # faire des fonctions partout
-# faire une fonction chaine de caracteres pour --arg
 # penser a IFS avant de faire un exit
 # mettre des codes exit dans des variables
 # faire des var commande option comme pour les makefiles
-# gerer si plusieurs modes de pre/temp en meme temps
 # voir pour les donnees manquantes du csv
 
-# verifier le format des dates ?
 
 
