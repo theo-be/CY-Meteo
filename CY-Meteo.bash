@@ -69,14 +69,14 @@
 
 NUM_CHAMP_STATION='1'
 NUM_CHAMP_DATE='2'
-NUM_CHAMP_PRESSION_MER='3'
+# NUM_CHAMP_PRESSION_MER='3'
 NUM_CHAMP_DIRECTION_VENT='4'
 NUM_CHAMP_VITESSE_VENT='5'
 NUM_CHAMP_HUMIDITE='6'
 NUM_CHAMP_PRESSION_STATION='7'
-NUM_CHAMP_VARIATION_PRESSION='8'
-NUM_CHAMP_PRECIPITATIONS='9'
-NUM_CHAMP_COORDONEES='10'
+# NUM_CHAMP_VARIATION_PRESSION='8'
+# NUM_CHAMP_PRECIPITATIONS='9'
+# NUM_CHAMP_COORDONEES='10'
 NUM_CHAMP_TEMPERATURE='11'
 NUM_CHAMP_TEMPERATURE_MIN='12'
 NUM_CHAMP_TEMPERATURE_MAX='13'
@@ -115,7 +115,7 @@ NUM_CHAMP_COMMUNES='15'
 # 97[4-6]00
 
 regex=""
-commande_grep=""
+# commande_grep=""
 REGEX_FRANCE="([0-8][0-9]|9[0-5]|2[a,b,A,B])[0-9]{3}$"
 REGEX_ANTILLES="97[1-2,7-8][0-9]{2}$"
 REGEX_ANTARCTIQUE="9841[0-9]$"
@@ -127,7 +127,7 @@ REGEX_SAINT_PIERRE="975[0-9]{2}$"
 
 # messages d'erreur
 
-MESSAGE_ERREUR_PRESSION='erreur pression'
+# MESSAGE_ERREUR_PRESSION='erreur pression'
 
 # nom des fichiers d'entree/sortie
 
@@ -139,9 +139,9 @@ fichier_sortie='test/filtre.csv'
 
 arg_fichier=0
 arg_pression=0
-mode_pression=''
+# mode_pression=''
 arg_temperature=0
-mode_temperature=''
+# mode_temperature=''
 arg_humidite=0
 arg_date=0
 arg_date1=''
@@ -152,7 +152,7 @@ arg_altitude=0
 arg_option=0
 arg_lieu=0
 lieu=''
-arg_mode_tri=0
+# arg_mode_tri=0
 mode_tri='avl'
 
 
@@ -162,7 +162,6 @@ mode_tri='avl'
 
 
 
-# echo "nombre d'arguments : $#"
 
 
 
@@ -181,14 +180,32 @@ optlieu() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+# programme principal
+
+
+# echo "nombre d'arguments : $#"
+
 # recuperation des arguments et options avec getopts
 
 while getopts ":wmhp:t:FGSAOQf:d::-:" option ; do
     # options longues
-    if [ $option = '-' ] ; then
+    if [ "$option" = '-' ] ; then
         case $OPTARG in
-            help) echo "menu d'aide";; # sortir immediatement apres
-            version) echo "CY-Meteo version 0.1";; # sortir immediatement apres
+            help) echo "menu d'aide"
+            exit 0 ;; # sortir immediatement apres
+            version) echo "CY-Meteo version 0.1"
+            exit 0 ;; # sortir immediatement apres
             avl) echo "opt $OPTARG"
             mode_tri=$OPTARG ;;
             abr) echo "opt $OPTARG"
@@ -230,6 +247,7 @@ while getopts ":wmhp:t:FGSAOQf:d::-:" option ; do
             # options de date
             d) echo 'opt d'
             echo "opt date : $OPTARG"
+            arg_date=1
             arg_date1=$OPTARG
             # arg_date2 ??????????????????????????????????????????
             # verif date blabla
@@ -354,10 +372,6 @@ if (($arg_lieu == 1)) ; then
 fi
 
 
-if (($arg_lieu == 1)) ; then
-    commande_grep="grep -E \"$regex\" $fichier_entree"
-fi
-
 # ancienne version
 
 
@@ -366,65 +380,56 @@ fi
 
 
 
-# if (($arg_altitude > 0)) ; then
-#     echo "filtrage alt ancien"
-#     # verifier les autres options
-#     echo "cut -d\; -f$code_communes$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_altitude.csv"
-#     cut -d\; -f"$code_communes$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_altitude.csv"
-#     if (($arg_lieu == 1)) ; then
-#         echo "grep -E \"$regex\" test/filtre_altitude.csv > test/temp1.csv"
-#         grep -E "\"$regex\"" test/filtre_altitude.csv > test/temp1.csv
-#         head -30 "test/temp1.csv"
-#     fi
-#     echo "fini"
-# fi
 
 
-# nouvelle version
-
-
-# if (($arg_altitude > 0)) ; then
-#     echo 'filtrage alt nouveau'
-#     echo "$commande_grep cut -d';' -f$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION > test/filtre_altitude.csv"
-#     "$commande_grep" | cut -d';' -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" > "test/filtre_altitude.csv"
-#     head -30 "test/filtre_altitude.csv"
-#     echo "fini"
-# fi
-
-
-
-
-
-
-
-
-
-# exit 0
-
-
-
-
+# nouvelle version (meilleure)
 
 
 if (($arg_altitude > 0)) ; then
-    echo "filtrage alt"
-    # verifier les autres options
-    echo "cut -d\; -f$code_communes$NUM_CHAMP_ALTITUDE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_altitude.csv"
-    cut -d\; -f"$code_communes$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_altitude.csv"
-
+    echo 'filtrage alt'
+    if (($arg_lieu == 1)) ; then
+        echo "filtre lieu"
+        grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" > test/filtre_altitude.csv
+    else 
+        cut -d\; -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION" "$fichier_entree" > test/filtre_altitude.csv
+    fi
+    head -20 test/filtre_altitude.csv
+    wc -l test/filtre_altitude.csv
+    echo "fini"
 fi
+
+
+
 
 
 if (($arg_humidite > 0)) ; then
-    echo "filtre hum"
-    # verifier les autres options
-    echo "cut -d\; -f$code_communes$NUM_CHAMP_HUMIDITE,$NUM_CHAMP_STATION $fichier_entree > test/filtre_humidite.csv"
-    cut -d\; -f"$code_communes$NUM_CHAMP_HUMIDITE","$NUM_CHAMP_STATION" "$fichier_entree" > "test/filtre_humidite.csv"
+    echo "filtrage hum"
+    if (($arg_lieu == 1)) ; then
+        echo "filtre lieu"
+        grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_HUMIDITE","$NUM_CHAMP_STATION" > test/filtre_humidite.csv
+    else 
+        cut -d\; -f"$NUM_CHAMP_HUMIDITE","$NUM_CHAMP_STATION" "$fichier_entree" > test/filtre_humidite.csv
+    fi
+    head -20 test/filtre_humidite.csv
+    wc -l test/filtre_humidite.csv
+    echo "fini"
 fi
+
+
+
+
+
 if (($arg_vent > 0)) ; then
-    echo "filtre vent"
-    echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_DIRECTION_VENT,$NUM_CHAMP_VITESSE_VENT $fichier_entree > test/filtre_vent.csv"
-    cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_DIRECTION_VENT","$NUM_CHAMP_VITESSE_VENT" "$fichier_entree" > "test/filtre_vent.csv"
+    echo "filtrage vent"
+    if (($arg_lieu == 1)) ; then
+        echo "filtre lieu"
+        grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_DIRECTION_VENT","$NUM_CHAMP_VITESSE_VENT" > test/filtre_vent.csv
+    else 
+        cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_DIRECTION_VENT","$NUM_CHAMP_VITESSE_VENT" "$fichier_entree" > test/filtre_vent.csv
+    fi
+    head -20 test/filtre_vent.csv
+    wc -l test/filtre_vent.csv
+    echo "fini"
 fi
 
 
@@ -433,16 +438,47 @@ if (($arg_pression > 0)) ; then
     # mode 1
     if (($arg_pression == 1)) ; then
         echo "filtrage p1"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p1.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p1.csv"
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" > test/filtre_p1.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > test/filtre_p1.csv
+        fi
+        head -20 test/filtre_p1.csv
+        wc -l test/filtre_p1.csv
+        echo "fini"
+    
+    
+    
+    
     elif (($arg_pression == 2)) ; then # mode 2
         echo "filtrage p2"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p2.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p2.csv"
+        
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_PRESSION_STATION" > test/filtre_p2.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > test/filtre_p2.csv
+        fi
+        head -20 test/filtre_p2.csv
+        wc -l test/filtre_p2.csv
+        echo "fini"
+    
+    
+    
+    
     else # mode 3
         echo "filtrage p3"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_PRESSION_STATION $fichier_entree > test/filtre_p3.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > "test/filtre_p3.csv"
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" > test/filtre_p3.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_PRESSION_STATION" "$fichier_entree" > test/filtre_p3.csv
+        fi
+        head -20 test/filtre_p3.csv
+        wc -l test/filtre_p3.csv
+        echo "fini"
+        
     fi
 fi
 if (($arg_temperature > 0)) ; then
@@ -450,25 +486,55 @@ if (($arg_temperature > 0)) ; then
     # mode 1
     if (($arg_temperature == 1)) ; then
         echo "filtrage t1"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE,$NUM_CHAMP_TEMPERATURE_MIN,$NUM_CHAMP_TEMPERATURE_MAX $fichier_entree > test/filtre_t1.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE","$NUM_CHAMP_TEMPERATURE_MIN","$NUM_CHAMP_TEMPERATURE_MAX" "$fichier_entree" > "test/filtre_t1.csv"
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE","$NUM_CHAMP_TEMPERATURE_MIN","$NUM_CHAMP_TEMPERATURE_MAX" > test/filtre_t1.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE","$NUM_CHAMP_TEMPERATURE_MIN","$NUM_CHAMP_TEMPERATURE_MAX" "$fichier_entree" > test/filtre_t1.csv
+        fi
+        head -20 test/filtre_t1.csv
+        wc -l test/filtre_t1.csv
+        echo "fini"
+        
+    
+    
+    
+    
     elif (($arg_temperature == 2)) ; then # mode 2
         echo "filtrage t2"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_TEMPERATURE $fichier_entree > test/filtre_t2.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "test/filtre_t2.csv"
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_TEMPERATURE" > test/filtre_t2.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > test/filtre_t2.csv
+        fi
+        head -20 test/filtre_t2.csv
+        wc -l test/filtre_t2.csv
+        echo "fini"
+        
+    
+    
+    
+    
     else # mode 3
         echo "filtrage t3"
-        echo "cut -d\; -f$code_communes$NUM_CHAMP_DATE,$NUM_CHAMP_STATION,$NUM_CHAMP_TEMPERATURE $fichier_entree > test/filtre_t3.csv"
-        cut -d\; -f"$code_communes$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > "test/filtre_t3.csv"
+        if (($arg_lieu == 1)) ; then
+            echo "filtre lieu"
+            grep -E "$regex" "$fichier_entree" | cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE" > test/filtre_t3.csv
+        else 
+            cut -d\; -f"$NUM_CHAMP_DATE","$NUM_CHAMP_STATION","$NUM_CHAMP_TEMPERATURE" "$fichier_entree" > test/filtre_t3.csv
+        fi
+        head -20 test/filtre_t3.csv
+        wc -l test/filtre_t3.csv
+        echo "fini"
+        
     fi
 fi
 
-# le code commune est toujours le dernier champ 
 
 
 
-
-
+# cut -f
 
 # Each range is one of:
 
@@ -544,23 +610,24 @@ exit 0
 
 
 # verifier les params d'entree :
-# verifier la compatibilite des params
+# verifier la compatibilite des params /
 # verifier lexistence du fichier /
-# revoir les cut
+# revoir les cut/grep
 # LA DATE
+
 # aller chercher le fichier et filtrer
 # si plusieurs modes : les faire a la suite dans plusieurs fichiers de sortie
 # verifier le format des dates
 # voir le fichier de sortie shell
 
-# verifier l'existence du C
-# le compiler sinon
+# verifier l'existence du C /
+# le compiler sinon /
 # afficher en echo les commandes avant de les exec
 
 
 
 
-# continuer la verif des arguments
+# continuer la verif des arguments /
 # faire des fonctions partout
 # penser a IFS avant de faire un exit
 # mettre des codes exit dans des variables
