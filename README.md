@@ -1,6 +1,6 @@
 # CY-Meteo
 
-Ce projet a pour objectif de creer un application qui va traiter un fichier de données météorologique pour ensuite afficher des graphiques. 
+Ce projet a pour objectif de créer un application qui va traiter un fichier de données météorologique pour ensuite afficher des graphiques. 
 
 # Pour commencer
 
