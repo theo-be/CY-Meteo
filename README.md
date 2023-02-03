@@ -30,5 +30,6 @@ En cas d'erreur lors de l'exécution du script Shell ou du programme C, un messa
 
 # Auteurs
 
-Théo Belliere 
+Théo Belliere
+
 Maëlys Picault
