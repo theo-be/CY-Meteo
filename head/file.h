@@ -3,7 +3,7 @@
 
 #include "arbre.h"
 
-// definition de la structure Chainon
+// Structure Chainon
 struct chainon {
     ElementArbre e;
     ElementArbre f;
@@ -25,7 +25,7 @@ Chainon *creationChainon(ElementArbre e, ElementArbre f, float g, ElementArbre h
 // Chainon *insertionOrdre(Chainon *pliste, PArbre e, int ordre);
 // insertion croissant
 
-// suppression
+// Suppression
 
 Chainon *suppressionDebut(Chainon *pliste);
 Chainon *suppressionFin(Chainon *pliste);
@@ -33,7 +33,7 @@ Chainon *suppressionFin(Chainon *pliste);
 Chainon *nettoyerListe(Chainon *pliste);
 
 
-// fonctions de tri du projet
+// Fonctions de tri du projet
 
 
 

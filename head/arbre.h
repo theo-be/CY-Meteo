@@ -8,7 +8,7 @@
 
 typedef long ElementArbre;
 
-
+// Structure d'arbre
 struct arbre {
     ElementArbre e;
     ElementArbre f;
