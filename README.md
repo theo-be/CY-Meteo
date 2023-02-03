@@ -4,7 +4,9 @@ Ce projet a pour objectif de créer un application qui va traiter un fichier de 
 
 # Pour commencer
 
-Pour utiliser ce projet il faut d'abord attribuer les droits de lecture et d'exécution à CY-Meteo.bash. Il faut ensuite lancer le script en faisant ./CY-Meteo.bash.
+Pour utiliser ce projet il faut attribuer les droits de lecture et d'exécution à CY-Meteo.bash. 
+Si le répertoire n'existe pas, créez un répertoire data à la racine du projet.
+Il faut ensuite lancer le script en faisant ./CY-Meteo.bash.
 
 # Utilisation
 
