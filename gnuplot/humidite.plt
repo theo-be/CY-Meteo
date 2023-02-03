@@ -17,5 +17,3 @@ set dgrid3d 20,20
 set colorbox vertical origin screen 0.9, 0.2 size screen 0.05, 0.6 front noinvert bdefault
 
 splot '../data/tri_humidite.csv' using 4:3:1 with pm3d
-
-# pause 5
