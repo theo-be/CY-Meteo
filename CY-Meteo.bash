@@ -13,7 +13,7 @@
 # 8 : Variation de pression en 24 heures
 # 9 : Precipitations dans les 24 derniÃ¨res heures
 # 10 : Coordonnees
-# 11 : Temperature ( °C)
+# 11 : Temperature ( °C)je
 # 12 : Temperature minimale sur 24 heures ( °C)
 # 13 : Temperature maximale sur 24 heures ( °C)
 # 14 : Altitude
@@ -122,48 +122,32 @@ while getopts ":wmhp:t:FGSAOQf:d::-:" option ; do
             help) echo "menu d'aide"
             echo "Utilisation : ./CY-Meteo.bash  [OPTIONS]  -f [FICHIER]
 
-Les options courtes :
+-f<fichier> : fichier d’entrée, option obligatoire et unique
 
-La première option est obligatoire :
--f<nom fichier> : fichier d’entrée
-
-Il faut mettre au minimum une option de données
-
-Les options de données :
 -w : vent
 -m : humidité
 -h : altitude
 -t<mode> : température
 -p<mode> : pression atmosphérique
+Au moins une option de donnée est obligatoire.
 
-Les options -t et -p doivent être accompagner d’un mode entre 1 et 3 :
-Mode 1 : produit en sortie les températures (ou pressions) minimales, maximales et moyennes par station dans l’ordre croissant du numéro de station
-Mode 2 : produit en sortie les températures (ou pressions) moyennes par date/heure, triées dans l’ordre chronologique. La moyenne se fait sur toutes les stations
-Mode 3 : produit en sortie les températures (ou pressions) par date/heure par station. Elles seront triées d’abord par ordre chronologique, puis par ordre croissant de l’identifiant de la station.
-
-
-Options de lieux (attention ces options sont exclusives entre elles) :
 -F : France : France métropolitaine + Corse
 -G : Guyane française
--S : Saint-Pierre et Miquelon : ile située à l’Est du Canada
+-S : Saint-Pierre et Miquelon
 -A : Antilles
 -O : Océan indien
 -Q : Antarctique
+Les options de lieux sont exclusives entre elles.
 
-Option de dates, les données de sortie sont dans l’intervalle de dates [<min>...<max>]
--d<min,max> : dates
-L’option -d ne prends qu’un seul argument contenant les deux dates (au format AAAA-MM-DD) séparé par une virgule.
+-d<min,max> : dates dans l’intervalle de dates [<min>...<max>] au format YYYY-MM-DD, option unique
 
-Les options longues :
-
-Options de tris :
 --tab : tri par listes chainées 
 --abr : tri par ABR
 --avl : tri par AVL"
             exit 0 ;; # Sortir immediatement apres
             version) 
             echo "CY-Meteo version 1.0"
-            echo "Voir ./CY-Meteo --help pour afficher le menu d'aide"
+            echo "Voir l'option --help pour afficher le menu d'aide"
             exit 0 ;; # Sortir immediatement apres
             avl) 
             mode_tri=$OPTARG ;;
@@ -454,7 +438,7 @@ fi
 # Altitude
 
 if (($arg_altitude == 1)) ; then
-    # Execution du programme
+    # Execution du programme    
     ./bin/tri -rf "$FICHIER_F_ALTITUDE" -o "$FICHIER_T_altitude" -t "$mode_tri" -k h
 
     # Verification du code de retour du programme de tri
@@ -544,7 +528,7 @@ if (($arg_pression > 0)) ; then
         cd 'gnuplot'
         gnuplot 'p3.plt'
         cd '..'
-        rm "$FICHIER_F_p3" "$FICHIER_T_p3"
+        # rm "$FICHIER_F_p3" "$FICHIER_T_p3"
     fi
 fi
 
@@ -589,7 +573,7 @@ if (($arg_temperature > 0)) ; then
         cd 'gnuplot'
         gnuplot 't3.plt'
         cd '..'
-        rm "$FICHIER_F_t3" "$FICHIER_T_t3"
+        # rm "$FICHIER_F_t3" "$FICHIER_T_t3"
     fi
 fi
 
@@ -597,47 +581,3 @@ echo "Tris terminés"
 echo "Graphiques générés dans le répertoire data"
 
 exit 0
-
-
-
-
-
-
-
-
-# parcourir les arg d'options de donnees
-# pour chaque option de donnees :
-# voir si les autres opt sont presentes
-# filtrer, trier, gnuplot
-
-
-
-# pour le C : option -r pour trier en decroissant
-
-# verifier les params d'entree :
-# verifier la compatibilite des params /
-# verifier lexistence du fichier /
-# revoir les cut/grep
-# LA DATE
-
-# aller chercher le fichier et filtrer
-# si plusieurs modes : les faire a la suite dans plusieurs fichiers de sortie
-# verifier le format des dates
-# voir le fichier de sortie shell
-
-# verifier l'existence du C /
-# le compiler sinon /
-# afficher en echo les commandes avant de les exec
-
-
-
-
-# continuer la verif des arguments /
-# faire des fonctions partout
-# penser a IFS avant de faire un exit
-# mettre des codes exit dans des variables
-# faire des var commande option comme pour les makefiles
-# voir pour les donnees manquantes du csv
-
-
-# tester le format csv
