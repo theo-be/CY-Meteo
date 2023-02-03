@@ -1,9 +1,9 @@
 
-CC=gcc
-OPTION=-Wall -lm
+CC=gcc -Wall
+OPTION= -lm
 RM=rm -rf
 SRC=$(wildcard src/*.c)
-HEAD=$(wildcard src/*.h)
+HEAD=$(wildcard head/*.h)
 OBJ=$(SRC:.c=.o)
 EXEC=bin/tri
 

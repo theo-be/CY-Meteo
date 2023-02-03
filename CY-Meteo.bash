@@ -281,10 +281,11 @@ echo "Filtrage du fichier d'entrée"
 if (($arg_altitude > 0)) ; then
     # filtrage avec restriction geographique
     if (($arg_lieu == 1)) ; then
-        
+        # On prend d'abord les bonnes lignes, puis on filtre par colonne
         grep -E "$regex" "$fichier_entree" | cut -sd\; -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION","$NUM_CHAMP_COORDONEES" > "$FICHIER_F_ALTITUDE"
     # filtrage sans restiction geographique
     else 
+        # On filtre par colonne, et on enleve la premiere ligne avec les titres
         cut -sd\; -f"$NUM_CHAMP_ALTITUDE","$NUM_CHAMP_STATION","$NUM_CHAMP_COORDONEES" "$fichier_entree" | tail -n+2 > "$FICHIER_F_ALTITUDE"
     fi
 fi
