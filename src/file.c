@@ -5,11 +5,12 @@
 
 #include "../head/file.h"
 
-// liste chainee
+// Liste chainee
 
-// manipulation de la liste
+// Manipulation de la liste
 
-// insertion
+// Insertion
+
 
 Chainon *creationChainon(ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     Chainon *n = malloc(sizeof(Chainon));
@@ -55,7 +56,7 @@ Chainon *insertionFin(Chainon *pliste, PArbre e) {
 }
 */
 
-// suppression
+// Suppression
 
 Chainon *suppressionDebut(Chainon *pliste) {
     if (!pliste) return NULL;
@@ -111,6 +112,11 @@ Chainon *nettoyerListe(Chainon *pliste) {
     return pliste;
 }
 
+
+
+
+// Fonctions necessaires au projet
+// Ne fonctionnent pas correctement
 
 
 Chainon *insertionCroissant(Chainon *pliste, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i) {
@@ -188,7 +194,7 @@ Chainon *insertionListeHumidite(Chainon *pliste, ElementArbre e, ElementArbre f,
 Chainon *insertionListeVent(Chainon *pliste, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!pliste) return creationChainon(e, f, g, h, i, j);
     Chainon *t = pliste;
-    Chainon *n = NULL;
+    // Chainon *n = NULL;
 
     while (e > t->e) {
         if (t->s) t = t->s;
@@ -209,7 +215,7 @@ Chainon *insertionListeVent(Chainon *pliste, ElementArbre e, ElementArbre f, flo
 Chainon *insertionListeP1(Chainon *pliste, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!pliste) return creationChainon(e, f, g, f, i, f);
     Chainon *t = pliste;
-    Chainon *n = NULL;
+    // Chainon *n = NULL;
 
     while (e > t->e) {
         if (t->s) t = t->s;
@@ -229,7 +235,7 @@ Chainon *insertionListeP1(Chainon *pliste, ElementArbre e, ElementArbre f, float
 Chainon *insertionListeP2(Chainon *pliste, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!pliste) return creationChainon(e, f, g, h, i, j);
     Chainon *t = pliste;
-    Chainon *n = NULL;
+    // Chainon *n = NULL;
 
     while (strcmp(i, pliste->i) > 0) {
         if (t->s) t = t->s;

@@ -57,6 +57,8 @@ PArbre equilibrerAVL(PArbre a) {
 }
 
 
+// fonctions necessaires au projet
+
 PArbre insertionAVL(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, int *_h) {
     if (!a) {
         *_h = 1;
@@ -90,14 +92,7 @@ PArbre insertionAVL(PArbre a, ElementArbre e, ElementArbre f, float g, ElementAr
 
 
 
-
-
-
-
-
-
-
-
+// Tri par altitude
 PArbre insertionAVLAltitude(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, int *_h) {
     if (!a) {
         *_h = 1;
@@ -111,6 +106,7 @@ PArbre insertionAVLAltitude(PArbre a, ElementArbre e, ElementArbre f, float g, E
         a->fd = insertionAVLAltitude(a->fd, e, f, g, h, i, _h);
     }
     else if (e == a->e) {
+        // Si doublon de station, on ne la stocke pas
         if (f == a->f) return a;
         else a->fm = insertionAVLAltitude(a->fm, e, f, g, h, i, _h);
     }        
@@ -120,14 +116,13 @@ PArbre insertionAVLAltitude(PArbre a, ElementArbre e, ElementArbre f, float g, E
     }
     if (*_h) {
         a->equilibre += *_h;
-        // a = equilibrerAVL(a);
         if (!(a->equilibre)) *_h = 0;
         else *_h = 1;
     }
     return a;
 }
 
-
+// Tri par station
 PArbre insertionAVLHumidite(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, int *_h) {
     if (!a) {
         *_h = 1;
@@ -141,6 +136,7 @@ PArbre insertionAVLHumidite(PArbre a, ElementArbre e, ElementArbre f, float g, E
         a->fd = insertionAVLHumidite(a->fd, e, f, g, h, i, _h);
     }
     else if (f == a->f) {
+        // Si l'humidite est plus grande que le max, c'est le nouveau max
         if (e > a->e) a->e = e;
     }        
     else {
@@ -155,7 +151,7 @@ PArbre insertionAVLHumidite(PArbre a, ElementArbre e, ElementArbre f, float g, E
     return a;
 }
 
-
+// Tri par station
 PArbre insertionAVLVent(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j, int *_h) {
     if (!a) {
         *_h = 1;
@@ -169,16 +165,13 @@ PArbre insertionAVLVent(PArbre a, ElementArbre e, ElementArbre f, float g, Eleme
         a->fd = insertionAVLVent(a->fd, e, f, g, h, i, j, _h);
     }
     else if (e == a->e) {
-
-        // ajout des valeurs
+        // Ajout des valeurs
         a->f += f;
         a->g += g;
 
-        // iterations
+        // Iterations
         a->h++;
         a->j++;
-
-
     }        
     else {
         *_h = 0;
@@ -192,11 +185,10 @@ PArbre insertionAVLVent(PArbre a, ElementArbre e, ElementArbre f, float g, Eleme
     return a;
 }
 
-
+// Tri par station
 PArbre insertionAVLP1(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j, int *_h) {
     if (!a) {
         *_h = 1;
-        // printf("creation arbre\n");
         return creerArbre(e, f, g, f, i, f);
     }
     else if (e < a->e) {
@@ -207,11 +199,10 @@ PArbre insertionAVLP1(PArbre a, ElementArbre e, ElementArbre f, float g, Element
         a->fd = insertionAVLP1(a->fd, e, f, g, h, i, j, _h);
     }
     else if (e == a->e) {
+        // Moyenne
         a->f += f;
         a->g++;
-
-        // h : min
-        // j : max
+        // Min et max
         if (f < a->h) a->h = f;
         if (f > a->j) a->j = f;
     }        
@@ -227,7 +218,7 @@ PArbre insertionAVLP1(PArbre a, ElementArbre e, ElementArbre f, float g, Element
     return a;
 }
 
-
+// Tri par date
 PArbre insertionAVLP2(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j, int *_h) {
     if (!a) {
         *_h = 1;
@@ -241,6 +232,7 @@ PArbre insertionAVLP2(PArbre a, ElementArbre e, ElementArbre f, float g, Element
         a->fd = insertionAVLP2(a->fd, e, f, g, h, i, j, _h);
     }
     else if (strcmp(i, a->i) == 0) {
+        // Moyenne
         a->f += f;
         a->g++;
     }        
@@ -256,7 +248,7 @@ PArbre insertionAVLP2(PArbre a, ElementArbre e, ElementArbre f, float g, Element
     return a;
 }
 
-
+// Tri par station
 PArbre insertionAVLP3(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j, int *_h) {
     if (!a) {
         *_h = 1;

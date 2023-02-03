@@ -8,20 +8,20 @@
 #include "../head/AVL.h"
 
 
-
-
-// 12/01 debut du c
-
-
 int main(int argc, char *argv[]) {
     // printf("executable C CY-Meteo\n");
+
+
+    // Variables liees aux options
 
     int option;
 
     int opt_entree = 0;
     int opt_sortie = 0;
-    int opt_r = 0;
+    // int opt_r = 0;
     int opt_d = 0;
+
+    // Variables liees aux arguments
 
     char *fichier_entree = malloc(sizeof(char) * 128);
     int mode_tri = -1;
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
         exit(4);
     }
     
+    // Recuperation des options
     
     while ((option = getopt(argc, argv, ":f:o:rk:t:")) != -1) {
         switch (option)  {
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
                 
                 break;
             case 'r':
-                opt_r = 1;
+                // opt_r = 1;
                 break;
             case 'k':
                 // option de donnee
@@ -70,28 +71,14 @@ int main(int argc, char *argv[]) {
                 else if (!strcmp("abr", optarg)) mode_tri = 1;
                 else if (!strcmp("tab", optarg)) mode_tri = 2;
                 else {
-                    printf("Erreur %s : argument inconnu\n");
+                    printf("Erreur %s : argument inconnu\n", optarg);
                     exit(1);
                 }
-                // printf("option de mode de tri\n");
             case '?':
-                // printf("Erreur : option -%c requiert un argument\n", option);
-                /*
-                switch (optopt) {
-                    case 'c':
-                        printf("Erreur : option -%c requiert un argument\n", optopt);
-                        break;
-                    
-                }
 
-
-
-                if (optopt == 'c') {
-                    printf("Erreur : option -%c requiert un argument\n", optopt);
-                }*/
                 break;
             default:
-                // option inconnue
+                // Option inconnue
                 printf("option inconnue %c\n", optopt);
                 exit(1);
                 break;
@@ -114,11 +101,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-
-
-    // for (int index = optind; index < argc; index++) {
-    //    printf("argument restant : %s\n", argv[index]);
-    // }
+    // Appel de la bonne fonction de tri en fonction de l'option de donnee
 
     if (!strcmp(option_d, "h")) {
         // altitude
@@ -157,7 +140,7 @@ int main(int argc, char *argv[]) {
         lectureFichierT3(fichier_entree, fichier_sortie, mode_tri);
     }
     else {
-        printf("%s : argument inconnu\n");
+        printf("%s : argument inconnu\n", option_d);
         exit(1);
     }
 
@@ -165,9 +148,9 @@ int main(int argc, char *argv[]) {
 }
 
 
-
+// Lis les donnees dans le fichier d'entree
 void lectureFichierAltitude(char *nom_fichier, char *nom_fichier_sortie, int mode) {
-    // printf("tri altitude\n");
+
     FILE *fichier = NULL;
     fichier = fopen(nom_fichier, "r");
     if (!fichier) {
@@ -176,6 +159,7 @@ void lectureFichierAltitude(char *nom_fichier, char *nom_fichier_sortie, int mod
     }
     // printf("fichier %s ouvert\n", nom_fichier);
 
+    // Allocation memoire pour stocker chaque ligne
     char *buffer = NULL;
     char *ligne = malloc(sizeof(char) * 1024);
     if (!ligne) {
@@ -187,16 +171,22 @@ void lectureFichierAltitude(char *nom_fichier, char *nom_fichier_sortie, int mod
     long valeur2 = 0;
     char *coordonees = NULL;
 
-    long i = 0;
+    // long i = 0;
     int h = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
+
+    // Boucle de recuperation des valeurs
     while (!feof(fichier)) {
         // i++;
 
         // printf("Ligne %ld :\r", i);
+
+        // Recuperation de la ligne
         fgets(ligne, 1023, fichier);
+
+        // Recuperation de chaque valeur et conversion en long
 
         // valeur 1 : num station
         buffer = strtok(ligne, ";");
@@ -213,13 +203,15 @@ void lectureFichierAltitude(char *nom_fichier, char *nom_fichier_sortie, int mod
         if (!buffer) continue;
         valeur2 = strtol(buffer, NULL, 10);
 
+        // Insertion selon le mode de tri
+
         if (mode == 0) {
             arbre = insertionAVLAltitude(arbre, valeur2, valeur1, 0, 0, coordonees, &h);
         }
         else if (mode == 1) {
             arbre = insertionABRAltitude(arbre, valeur2, valeur1, 0, 0, coordonees);
         }
-        else{
+        else {
             liste = insertionListeAltitude(liste, valeur2, valeur1, 0, 0, coordonees);
         }
     }
@@ -228,9 +220,12 @@ void lectureFichierAltitude(char *nom_fichier, char *nom_fichier_sortie, int mod
 
     // printf("\nlecture terminee, %ld lignes\n", i);
 
+    // Appel de la fonction d'ecriture associee
+
     ecritureFichierAltitude(nom_fichier_sortie, arbre, liste);
 }
 
+// Equivalent de la fonction altitude pour le mode humidite
 void lectureFichierHumidite(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri humidite\n");
     FILE *fichier = NULL;
@@ -253,7 +248,7 @@ void lectureFichierHumidite(char *nom_fichier, char *nom_fichier_sortie, int mod
     char *coordonees = NULL;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -314,6 +309,7 @@ void lectureFichierHumidite(char *nom_fichier, char *nom_fichier_sortie, int mod
 
 }
 
+// Parcours l'arbre a et cree un avl b en fonction de la valeur clef e
 PArbre parcoursHumidite(PArbre a, PArbre b) {
     if (!a) return b;
     b = parcoursHumidite(a->fg, b);
@@ -329,11 +325,11 @@ PArbre parcoursHumidite(PArbre a, PArbre b) {
     return b;
 }
 
+// Equivalent en ABR
 PArbre parcoursHumiditeABR(PArbre a, PArbre b) {
     if (!a) return b;
     b = parcoursHumiditeABR(a->fg, b);
     // printf("insertion");
-    int h = 0;
     b = insertABR(b, a->e, a->f, a->g, a->h, a->i, a->j);
     // printf("insere");
     b = parcoursHumiditeABR(a->fm, b);
@@ -344,6 +340,7 @@ PArbre parcoursHumiditeABR(PArbre a, PArbre b) {
     return b;
 }
 
+// Equivalent en liste chainee
 Chainon *parcoursListeHumidite(Chainon *a) {
     if (!a) return NULL;
     Chainon *b = NULL;
@@ -355,7 +352,7 @@ Chainon *parcoursListeHumidite(Chainon *a) {
 }
 
 
-
+// Equivalent de la fonction altitude pour le mode vent
 void lectureFichierVent(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri vent\n");
 
@@ -379,11 +376,8 @@ void lectureFichierVent(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     float valeur3 = .0;
     char *coordonees = NULL;
 
-    float vx = .0, vy = .0;
-    long dirX = 0, dirY = 0;
 
-
-    long i = 0;
+    // long i = 0;
     int h = 0;
 
 
@@ -438,6 +432,7 @@ void lectureFichierVent(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     ecritureFichierVent(nom_fichier_sortie, arbre, liste);
 }
 
+// Parcours l'arbre pour faire la moyenne
 void parcoursMoyenneVent(PArbre a) {
     if (!a) return;
     ElementArbre moy_dir = a->f / a->h;
@@ -448,6 +443,7 @@ void parcoursMoyenneVent(PArbre a) {
     parcoursMoyenneVent(a->fd);
 }
 
+// Parcours la liste pour faire la moyenne
 void parcoursListeMoyenneVent(Chainon *l) {
     while (l) {
         ElementArbre moy_dir = l->f / l->h;
@@ -459,7 +455,7 @@ void parcoursListeMoyenneVent(Chainon *l) {
     
 }
 
-
+// Equivalent de la fonction altitude pour le mode p1
 void lectureFichierP1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri p1\n");
 
@@ -482,7 +478,7 @@ void lectureFichierP1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     long valeur2 = 0;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -532,7 +528,7 @@ void lectureFichierP1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
 
 }
 
-
+// Equivalent de la fonction altitude pour le mode t1
 void lectureFichierT1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri t1\n");
     FILE *fichier = NULL;
@@ -554,7 +550,7 @@ void lectureFichierT1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     long valeur2 = 0;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -606,6 +602,7 @@ void lectureFichierT1(char *nom_fichier, char *nom_fichier_sortie, int mode) {
 }
 
 
+// Parcours l'arbre pour faire la moyenne
 void parcoursMoyenneP1(PArbre a) {
     if (!a) return;
     ElementArbre moy = a->f / a->g;
@@ -614,6 +611,7 @@ void parcoursMoyenneP1(PArbre a) {
     parcoursMoyenneP1(a->fd);
 }
 
+// Parcours la liste pour faire la moyenne
 void parcoursMoyenneListeP1(Chainon *liste) {
     while (liste) {
         ElementArbre moy = liste->f / liste->g;
@@ -623,7 +621,7 @@ void parcoursMoyenneListeP1(Chainon *liste) {
     
 }
 
-
+// Equivalent de la fonction altitude pour le mode p2
 void lectureFichierP2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri p2\n");
     FILE *fichier = NULL;
@@ -641,12 +639,11 @@ void lectureFichierP2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
         exit(4);
     }
 
-    long valeur1 = 0;
     long valeur2 = 0;
     char *coordonees = NULL;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -698,7 +695,7 @@ void lectureFichierP2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
 
 }
 
-
+// Equivalent de la fonction altitude pour le mode t2
 void lectureFichierT2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri t2\n");
     FILE *fichier = NULL;
@@ -716,12 +713,11 @@ void lectureFichierT2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
         exit(4);
     }
 
-    long valeur1 = 0;
     long valeur2 = 0;
     char *coordonees = NULL;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -773,7 +769,7 @@ void lectureFichierT2(char *nom_fichier, char *nom_fichier_sortie, int mode) {
 }
 
 
-
+// Equivalent de la fonction altitude pour le mode p3
 void lectureFichierP3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri p3\n");
     FILE *fichier = NULL;
@@ -796,7 +792,7 @@ void lectureFichierP3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     char *date = NULL;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -877,7 +873,7 @@ void lectureFichierP3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     
 }
 
-
+// Equivalent de la fonction altitude pour le mode t3
 void lectureFichierT3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     // printf("tri t3\n");
     // char *nom_fichier = "test/filtre_t3.csv";
@@ -901,7 +897,7 @@ void lectureFichierT3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
     char *date = NULL;
 
     int h = 0;
-    long i = 0;
+    // long i = 0;
 
     PArbre arbre = NULL;
     Chainon *liste = NULL;
@@ -996,6 +992,7 @@ void lectureFichierT3(char *nom_fichier, char *nom_fichier_sortie, int mode) {
 
 
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureCroissant(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureCroissant(a->fg, f);
@@ -1004,6 +1001,7 @@ void parcoursInfixeEcritureCroissant(PArbre a, FILE *f) {
     parcoursInfixeEcritureCroissant(a->fd, f);
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureCroissantP1(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureCroissantP1(a->fg, f);
@@ -1011,6 +1009,7 @@ void parcoursInfixeEcritureCroissantP1(PArbre a, FILE *f) {
     parcoursInfixeEcritureCroissantP1(a->fd, f);
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureCroissantP2(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureCroissantP2(a->fg, f);
@@ -1019,6 +1018,7 @@ void parcoursInfixeEcritureCroissantP2(PArbre a, FILE *f) {
     parcoursInfixeEcritureCroissantP2(a->fd, f);
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureDecroissant(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureDecroissant(a->fd, f);
@@ -1028,6 +1028,7 @@ void parcoursInfixeEcritureDecroissant(PArbre a, FILE *f) {
     parcoursInfixeEcritureDecroissant(a->fg, f);
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureDecroissantAltitude(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureDecroissantAltitude(a->fd, f);
@@ -1036,6 +1037,7 @@ void parcoursInfixeEcritureDecroissantAltitude(PArbre a, FILE *f) {
     parcoursInfixeEcritureDecroissantAltitude(a->fg, f);
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursInfixeEcritureCroissantP3(PArbre a, FILE *f) {
     if (!a) return;
     parcoursInfixeEcritureCroissantP3(a->fg, f);
@@ -1045,6 +1047,7 @@ void parcoursInfixeEcritureCroissantP3(PArbre a, FILE *f) {
 }
 
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureCroissant(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%ld,%f,%s\n", l->f, l->g, l->i);
@@ -1052,6 +1055,7 @@ void parcoursListeEcritureCroissant(Chainon *l, FILE *f) {
     }
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureCroissantP1(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%ld,%ld,%ld,%ld\n", l->e, l->f, l->h, l->j);
@@ -1059,6 +1063,7 @@ void parcoursListeEcritureCroissantP1(Chainon *l, FILE *f) {
     }
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureCroissantP2(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%s,%ld\n", l->i, l->f);
@@ -1066,6 +1071,7 @@ void parcoursListeEcritureCroissantP2(Chainon *l, FILE *f) {
     }
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureDecroissant(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%ld,%ld,%s\n", l->e, l->f, l->i);
@@ -1073,6 +1079,7 @@ void parcoursListeEcritureDecroissant(Chainon *l, FILE *f) {
     }
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureDecroissantAltitude(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%ld,%s\n", l->e, l->i);
@@ -1080,6 +1087,7 @@ void parcoursListeEcritureDecroissantAltitude(Chainon *l, FILE *f) {
     }
 }
 
+// Parcours approprie utilise pour le mode et ecriture des valeurs necessaires pour gnuplot
 void parcoursListeEcritureCroissantP3(Chainon *l, FILE *f) {
     while (l) {
         fprintf(f, "%ld,%s,%ld\n", l->e, l->i, l->f);
@@ -1088,9 +1096,9 @@ void parcoursListeEcritureCroissantP3(Chainon *l, FILE *f) {
 }
 
 
-
+// Ecris dans un fichier les donnees triees
 void ecritureFichierAltitude(char *nom_fichier, PArbre a, Chainon *liste) {
-    // char *nom_fichier = "test/tri_altitude.csv";
+
     FILE *sortie = fopen(nom_fichier, "w+");
     if (!sortie) {
         printf("Erreur ouverture de %s\n", nom_fichier);
@@ -1099,19 +1107,23 @@ void ecritureFichierAltitude(char *nom_fichier, PArbre a, Chainon *liste) {
 
     // printf("debut de l\'ecriture %s\n", nom_fichier);
 
+    // Si on a a == NULL, alors le tri a ete fait par liste
+
     if (a)
         parcoursInfixeEcritureDecroissantAltitude(a, sortie);
     else 
         parcoursListeEcritureDecroissantAltitude(liste, sortie);
 
-
-
     // printf("fin de l\'ecriture %s\n", nom_fichier);
+
+
+    // Fermeture du fichier et liberation de la memoire
     fclose(sortie);
     free(a);
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour l'humidite
 void ecritureFichierHumidite(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_humidite.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1133,6 +1145,7 @@ void ecritureFichierHumidite(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour le vent
 void ecritureFichierVent(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_vent.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1154,6 +1167,7 @@ void ecritureFichierVent(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour p1
 void ecritureFichierP1(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_p1.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1176,6 +1190,7 @@ void ecritureFichierP1(char *nom_fichier, PArbre a, Chainon *liste) {
 }
 
 
+// Equivalent de la fonction altitude pour p2
 void ecritureFichierP2(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_p2.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1197,6 +1212,7 @@ void ecritureFichierP2(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour t1
 void ecritureFichierT1(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_t1.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1218,6 +1234,7 @@ void ecritureFichierT1(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour t2
 void ecritureFichierT2(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_t2.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1239,6 +1256,7 @@ void ecritureFichierT2(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour p3
 void ecritureFichierP3(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_p3.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1260,6 +1278,7 @@ void ecritureFichierP3(char *nom_fichier, PArbre a, Chainon *liste) {
     free(liste);
 }
 
+// Equivalent de la fonction altitude pour t3
 void ecritureFichierT3(char *nom_fichier, PArbre a, Chainon *liste) {
     // char *nom_fichier = "test/tri_t3.csv";
     FILE *sortie = fopen(nom_fichier, "w+");
@@ -1283,55 +1302,10 @@ void ecritureFichierT3(char *nom_fichier, PArbre a, Chainon *liste) {
 
 
 
-
-
-
-
 /*
 
-nettoyer le gnuplot
+code laisse en commentaire pour voir la progression en direct du tri
 
-commentaires C
-
-github : push et envoyer le lien sur teams
-
-LA DATE
-
-revoir mode 3 : insertion des fils des doublons dans l'ordre
-
-faire les tris par liste
-
-
-readme
-rapport : mettre les droits au shell, manque de donnees avec le filtrage geo/, 
-exemples d'execution/, gestion des doublons, structure arbre/chainon, options C, 
-methodes pour chaque type de donnee, pk c code en dur
-les pbs de pt2/, pt3 non fait/, valeurs de pression moyenne p1 negatives/
-separateur d'entree ; separateur de sortie , car on peut melanger avec lat et long
-nombres a virgule tronques/, fichiers temp crees puis supprimes/,
-option -r inutile/, compilation propre, LA DATE
-
-
-PLANNING derniere semaine
-lundi : tri alt, hum, vent, debut p1
-mardi : tri p1 t1 p2 t2 p3 t3
-mercredi : getopt, association du shell et du c, gestion des fichiers temporaires, gnuplot vent, p1, p2
-jeudi : gnuplot alt, hum  pt1, pt2, tri abr, debut liste, commentaires, ajustement du shell
-vendredi paufiner gnuplot, finalisation du rapport et du readme
-
-
-
-
-
-
-
-filtrer par coordonees
-faire des casts pour les flottants
-optimiser le code pour strtol et strtok
-
-
-
-
-voir pour le multi-thread pour un tri plus efficace/rapide
+voir le multi-thread pour un tri plus efficace/rapide
 
 */

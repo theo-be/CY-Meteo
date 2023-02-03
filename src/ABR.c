@@ -32,7 +32,7 @@ PArbre insertABR(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre
 
 
 
-
+// Tri par altitude
 PArbre insertionABRAltitude(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i) {
     if (!a) {
         return creerArbre(e, f, g, h, i, 0.0);
@@ -50,7 +50,7 @@ PArbre insertionABRAltitude(PArbre a, ElementArbre e, ElementArbre f, float g, E
     return a;
 }
 
-
+// Tri par station
 PArbre insertionABRHumidite(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i) {
     if (!a) {
         return creerArbre(e, f, g, h, i, .0);
@@ -67,7 +67,7 @@ PArbre insertionABRHumidite(PArbre a, ElementArbre e, ElementArbre f, float g, E
     return a;
 }
 
-
+// Tri par station
 PArbre insertionABRVent(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!a) {
         return creerArbre(e, f, g, h, i, j);
@@ -94,7 +94,7 @@ PArbre insertionABRVent(PArbre a, ElementArbre e, ElementArbre f, float g, Eleme
     return a;
 }
 
-
+// Tri par station
 PArbre insertionABRP1(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!a) {
         // printf("creation arbre\n");
@@ -117,7 +117,7 @@ PArbre insertionABRP1(PArbre a, ElementArbre e, ElementArbre f, float g, Element
     return a;
 }
 
-
+// Tri par date
 PArbre insertionABRP2(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!a) {
         // printf("creation arbre\n");
@@ -140,7 +140,7 @@ PArbre insertionABRP2(PArbre a, ElementArbre e, ElementArbre f, float g, Element
     return a;
 }
 
-
+// Tri par station
 PArbre insertionABRP3(PArbre a, ElementArbre e, ElementArbre f, float g, ElementArbre h, char *i, ElementArbre j) {
     if (!a) {
         return creerArbre(e, f, g, h, i, j);
